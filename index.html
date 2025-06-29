@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Ґус у космосі — Космічні пригоди</title>
+<style>
+  body { background: #000; color: #0f0; font-family: monospace; padding: 1em; }
+  #game { max-width: 600px; margin: auto; }
+  button { background: #222; color: #0f0; border: 1px solid #0f0; padding: 0.5em 1em; margin: 0.2em; cursor: pointer; }
+  button:hover { background: #0f0; color: #000; }
+  #log { background: #111; padding: 1em; height: 200px; overflow-y: auto; margin-top: 1em; }
+</style>
+</head>
+<body>
+  <div id="game">
+    <h1>Ґус у космосі</h1>
+    <p>Ти капітан космічного корабля зі своїм фльоркеном Гусем. <br/> Твоя мета — вижити в космосі, борючись з ТЦК (Територіальним Центральним Козлом).</p>
+    <div>
+      <button onclick="startGame()">Почати гру</button>
+      <button onclick="explore()" disabled id="exploreBtn">Дослідити простір</button>
+      <button onclick="useFlorken()" disabled id="florkenBtn">Викликати Ґуся</button>
+    </div>
+    <div id="log"></div>
+  </div>
+<script>
+  const logDiv = document.getElementById('log');
+  const exploreBtn = document.getElementById('exploreBtn');
+  const florkenBtn = document.getElementById('florkenBtn');
+
+  let florkenCooldown = 0;
+  let gameStarted = false;
+  let reputation = 0;
+  let gasRockets = 3;
+
+  function log(msg) {
+    logDiv.innerHTML += msg + '<br>';
+    logDiv.scrollTop = logDiv.scrollHeight;
+  }
+
+  function startGame() {
+    gameStarted = true;
+    reputation = 0;
+    gasRockets = 3;
+    florkenCooldown = 0;
+    logDiv.innerHTML = '';
+    log('Гра почалась! Ти на орбіті навколо невідомої планети.');
+    log('У тебе є 3 газові ракети для боротьби з ТЦК.');
+    exploreBtn.disabled = false;
+    florkenBtn.disabled = false;
+  }
+
+  function randomEvent() {
+    const events = [
+      () => {
+        log('ТЦК з\'явився! Ворог нападає!');
+        if(gasRockets > 0) {
+          log('Використовуєш газову ракету...');
+          gasRockets--;
+          log('Ракета потрапила! ТЦК відступає.');
+          reputation += 2;
+        } else {
+          log('Ракет немає! ТЦК завдає шкоди. Ти втрачаєш репутацію.');
+          reputation -= 3;
+          if(reputation < -5) {
+            log('Репутація занизька. Гра закінчена.');
+            endGame();
+          }
+        }
+      },
+      () => {
+        log('Порожній простір. Нічого не відбувається.');
+      },
+      () => {
+        log('ТЦК просить бакшиш...');
+        const pay = confirm('Дати бакшиш ТЦК?');
+        if(pay) {
+          log('ТЦК задоволений. Репутація зростає.');
+          reputation += 1;
+        } else {
+          log('ТЦК розлючений! Ти втрачав репутацію.');
+          reputation -= 2;
+        }
+      },
+      () => {
+        log('Ґусь (фльоркен) бачить небезпеку...');
+        if(florkenCooldown === 0) {
+          log('Ґусь рятує тебе від критичної ситуації!');
+          florkenCooldown = 3;
+          reputation += 3;
+        } else {
+          log('Ґусь хоче допомогти, але ще відпочиває.');
+          florkenCooldown--;
+        }
+      }
+    ];
+    const eventIndex = Math.floor(Math.random() * events.length);
+    events[eventIndex]();
+  }
+
+  function explore() {
+    if(!gameStarted) return;
+    log('Досліджуєш простір...');
+    randomEvent();
+    if(florkenCooldown > 0) florkenCooldown--;
+    log(`Репутація: ${reputation}, Газові ракети: ${gasRockets}, Відпочинок Ґуся: ${florkenCooldown}`);
+  }
+
+  function useFlorken() {
+    if(florkenCooldown === 0) {
+      log('Ґусь виходить на допомогу!');
+      reputation += 3;
+      florkenCooldown = 3;
+    } else {
+      log('Ґусь ще відпочиває, зачекай трохи...');
+      florkenCooldown--;
+    }
+    log(`Репутація: ${reputation}, Відпочинок Ґуся: ${florkenCooldown}`);
+  }
+
+  function endGame() {
+    log('Гра закінчена. Дякую за гру!');
+    exploreBtn.disabled = true;
+    florkenBtn.disabled = true;
+    gameStarted = false;
+  }
+</script>
+</body>
+</html>
